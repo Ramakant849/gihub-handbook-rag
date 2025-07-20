@@ -150,7 +150,7 @@ def select_relevant_files(query, request_id=None):
             doc_content = hit.payload.get("text", "")
             # Qdrant stores metadata directly in the payload
             # Assuming 'path' is part of the payload if it was indexed
-            file_path = hit.payload.get("path", f"chunk_{hit.id}.txt") # Default if path not in payload
+            file_path = hit.payload.get("source", f"chunk_{hit.id}.txt") # Default if path not in payload
             
             documents.append({
                 'document': doc_content,
@@ -240,7 +240,7 @@ def summarize_text(text, max_tokens=200, parent_request_id=None):
         logger.info("Using fallback truncation for summarization")
         return truncated_text[:1000] + "..."
 
-def generate_gpt4_response(query, context_docs, max_context_tokens=8000, max_response_tokens=4000, request_id=None):
+def generate_response_using_gemini(query, context_docs, max_context_tokens=8000, max_response_tokens=4000, request_id=None):
     """
     Generate a response using the configured model based on the query and retrieved context documents.
     """
@@ -827,7 +827,7 @@ def chat_endpoint():
                 })
             
             # Generate response using GPT-4 for a new query (no conversation history needed)
-            answer = generate_gpt4_response(
+            answer = generate_response_using_gemini(
                 query, 
                 retrieved_docs, 
                 request_id=request_id
