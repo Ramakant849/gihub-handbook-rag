@@ -14,6 +14,7 @@ This project implements a Retrieval-Augmented Generation (RAG) system designed t
   - [1. Ingest Data into Vector Database](#1-ingest-data-into-vector-database)
   - [2. Run the API Server](#2-run-the-api-server)
   - [3. Interact with the API](#3-interact-with-the-api)
+  - [4. Run the Chatbot Frontend](#4-run-the-chatbot-frontend)
 - [API Endpoints](#api-endpoints)
 - [Technologies Used](#technologies-used)
 
@@ -26,6 +27,7 @@ This project implements a Retrieval-Augmented Generation (RAG) system designed t
 - **Conversation History**: Maintains chat history for contextual follow-up questions.
 - **Gemini Integration**: Leverages the Gemini API (specifically `gemini-1.0-pro`) for generating refined responses based on retrieved context.
 - **Logging**: Comprehensive logging for monitoring and debugging.
+- **Chatbot Frontend**: A Streamlit-based interactive chat interface.
 
 ## Prerequisites
 
@@ -135,6 +137,18 @@ http://localhost:8491/api/chat
 }
 ```
 
+### 4. Run the Chatbot Frontend
+
+Navigate to the `frontend` directory and install the required packages, then run the Streamlit application:
+
+```bash
+cd frontend
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+This will launch the chatbot interface in your web browser, typically at `http://localhost:8501`.
+
 ## API Endpoints
 
 - **POST /api/chat**
@@ -165,6 +179,9 @@ http://localhost:8491/api/chat
 ## Technologies Used
 
 - **Python**
+- **Streamlit**: For building the interactive chatbot frontend.
+- **streamlit-chat**: For creating chat UI components.
+- **Requests**: For making HTTP requests to the backend API.
 - **Flask**: Web framework for the API.
 - **Qdrant**: Vector database for similarity search.
 - **Hugging Face Transformers**: For generating text embeddings (`sentence-transformers/all-MiniLM-L6-v2`).
