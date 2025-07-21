@@ -159,10 +159,13 @@ def list_and_describe_collections():
         except Exception as e:
             print(f"    Error retrieving details for {collection_info}: {e}")
 
-
-if __name__ == "__main__":
+def load_docs_and_push_to_db():
     loaded_docs = load_documents("sample_data")
     chunks = chunk_documents(loaded_docs)
     create_and_store_embeddings(chunks)
     print("Data processing pipeline initiated and embeddings stored in Qdrant.") 
     list_and_describe_collections()
+    
+
+if __name__ == "__main__":
+    load_docs_and_push_to_db()

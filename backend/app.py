@@ -18,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
 from backend.lark_handler import init_lark_bot # Changed to absolute import
 # Import model configuration
 from backend.model_config import generate_completion, start_request_flow, end_request_flow, suppress_duplicate_logs # Changed to absolute import
+from backend.vector_database_handler import load_docs_and_push_to_db
 import re
 
 # Determine the project root directory (one level up from services/) - adjusted for backend/app.py
@@ -907,6 +908,7 @@ def list_and_describe_collections():
 
 def main():
     # list_and_describe_collections()
+    load_docs_and_push_to_db()
 
     # Load configuration
     host = os.getenv("HOST", "0.0.0.0")

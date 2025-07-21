@@ -4,3 +4,8 @@ tiktoken==0.7.0
 python-dotenv==1.0.0
 Flask==2.3.3
 pycryptodome==3.19.0
+torch
+transformers
+qdrant-client
+langchain
+google-generativeai
