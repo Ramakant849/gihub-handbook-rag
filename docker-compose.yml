@@ -5,6 +5,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      network: host
     ports:
       - "8491:8491"
     environment:
@@ -23,6 +24,9 @@ services:
       # Mount qdrant_data directory to persist vector database
       - ./qdrant_data:/app/qdrant_data
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     networks:
       - app-network
 
