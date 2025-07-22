@@ -13,7 +13,11 @@ from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 from Crypto.Cipher import AES
 
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Adjust PROJECT_ROOT for Docker environment
+if os.path.exists("/app") and os.getcwd().startswith("/app"):
+    PROJECT_ROOT = "/app"
+else:
+    PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 

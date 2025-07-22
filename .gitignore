@@ -4,8 +4,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Vector database
-chroma_db/
+# Vector database (local mode)
+qdrant_data/
 
 # Environment variables
 .env
@@ -29,9 +29,12 @@ Thumbs.db
 structured_content/*
 repo_summaries/*
 
-# Logs
+# Logs (keep structure but ignore content)
 logs/*
+!logs/.gitkeep
 
-.vscode
+# Data directories
+backend/gitlab_handbook_scrapped_data
 
-backend/data/
+# Temporary test databases
+test_qdrant_db/

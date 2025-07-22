@@ -1,14 +1,31 @@
-services:
-  chromadb:
-    image: chromadb/chroma
-    volumes:
-      - chromadb_data:/chroma/chroma
-    ports:
-      - "8000:8000"
-    environment:
-      - IS_PERSISTENT=TRUE
-      - CHROMA_SERVER_NO_COPY_WARNING=TRUE
-      - ALLOW_RESET=TRUE
+version: '3.8'
 
-volumes:
-  chromadb_data: 
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8491:8491"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8491
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - BASE_URL=${BASE_URL:-https://handbook.gitlab.com/}
+      - LARK_APP_ID=${LARK_APP_ID:-}
+      - LARK_APP_SECRET=${LARK_APP_SECRET:-}
+      - LARK_VERIFICATION_TOKEN=${LARK_VERIFICATION_TOKEN:-}
+      - LARK_ENCRYPT_KEY=${LARK_ENCRYPT_KEY:-}
+      - LARK_HOST=${LARK_HOST:-https://open.feishu.cn}
+    volumes:
+      # Mount logs directory to persist logs
+      - ./logs:/app/logs
+      # Mount qdrant_data directory to persist vector database
+      - ./qdrant_data:/app/qdrant_data
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge 

@@ -9,16 +9,17 @@ from dotenv import load_dotenv
 from flask import Flask, request, jsonify
 from qdrant_client import QdrantClient, models
 from transformers import AutoModel, AutoTokenizer
+from qdrant_client_shared import get_qdrant_client
 # Import Lark handler
 # Adjust project root for sys.path to resolve relative import issues when running directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from backend.lark_handler import init_lark_bot # Changed to absolute import
+from lark_handler import init_lark_bot # Changed to relative import for Docker
 # Import model configuration
-from backend.model_config import generate_completion, start_request_flow, end_request_flow, suppress_duplicate_logs # Changed to absolute import
-from backend.vector_database_handler import load_docs_and_push_to_db
+from model_config import generate_completion, start_request_flow, end_request_flow, suppress_duplicate_logs # Changed to relative import for Docker
+from vector_database_handler import load_docs_and_push_to_db
 import re
 
 # Determine the project root directory (one level up from services/) - adjusted for backend/app.py
@@ -26,6 +27,8 @@ import re
 
 # Ensure logs directory exists
 os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
+# Create directory for local Qdrant database
+os.makedirs(os.path.join(PROJECT_ROOT, "qdrant_data"), exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
@@ -44,9 +47,6 @@ load_dotenv(os.path.join(PROJECT_ROOT, ".env"))
 # Initialize Hugging Face Tokenizer and Model for embeddings
 tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-
-# Initialize Qdrant client
-qdrant_client = QdrantClient(host="localhost", port=6333) # Connect to local Qdrant instance
 
 def encode(texts):
     """Generates embeddings for a list of texts using Hugging Face Transformers."""
@@ -138,7 +138,7 @@ def select_relevant_files(query, request_id=None):
         query_embedding = encode([query])[0] # encode returns a list of embeddings
         
         # Perform the similarity search using Qdrant client
-        search_result = qdrant_client.search(
+        search_result = get_qdrant_client().search(
             collection_name=collection_name,
             query_vector=query_embedding,
             limit=30, # Use the max_files parameter for the limit
@@ -664,6 +664,18 @@ def generate_followup_response(query, context_docs, conversation_history, reques
             time.sleep(backoff_time)
             backoff_time *= 2  # Exponential backoff
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    """
+    Health check endpoint for Docker and monitoring systems.
+    """
+    try:
+        # Basic check if the app is responsive
+        return jsonify({"status": "healthy", "message": "Service is running"}), 200
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
 @app.route('/api/chat', methods=['POST'])
 def chat_endpoint():
     """
@@ -879,7 +891,7 @@ def list_and_describe_collections():
     """Lists all collections and provides a basic description."""
     print("\n--- Listing Qdrant Collections ---")
     try:
-        response = qdrant_client.get_collections()
+        response = get_qdrant_client().get_collections()
         collections = response.collections
     except Exception as e:
         print(f"Error fetching collections: {e}")
@@ -896,7 +908,7 @@ def list_and_describe_collections():
             print(f"  - Collection Name: {collection_name}")
 
             # Fetch detailed collection info to get the points count
-            collection_details = qdrant_client.get_collection(collection_name)
+            collection_details = get_qdrant_client().get_collection(collection_name)
             points_count = collection_details.points_count
             status = collection_details.status
 

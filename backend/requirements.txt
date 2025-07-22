@@ -1,11 +1,25 @@
-openai==1.65.4
-Requests==2.32.3
-tiktoken==0.7.0
-python-dotenv==1.0.0
+# Core API and Web Framework
 Flask==2.3.3
+python-dotenv==1.0.0
+
+# AI/ML Models and Processing
+google-generativeai>=0.8.0
+openai>=1.86.0
+tiktoken==0.7.0
+
+# Machine Learning and Embeddings  
+torch>=2.0.0
+transformers>=4.20.0
+
+# Vector Database (Local Mode) - Optimized for local storage
+qdrant-client>=1.14.3
+
+# Text Processing and Document Handling
+langchain>=0.1.0
+
+# HTTP Client and Security
+Requests==2.32.3
 pycryptodome==3.19.0
-torch
-transformers
-qdrant-client
-langchain
-google-generativeai
+
+# Note: For local Qdrant mode, no external server dependencies are required
+# The qdrant-client package includes all necessary components for local operation

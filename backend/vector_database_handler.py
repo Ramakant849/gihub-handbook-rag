@@ -2,10 +2,12 @@ import os
 import logging
 import sys
 import torch
+import time
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, models
 from transformers import AutoModel, AutoTokenizer
+from qdrant_client_shared import get_qdrant_client
 
 load_dotenv()
 
@@ -13,6 +15,8 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Def
 
 os.makedirs(os.path.join(PROJECT_ROOT, "logs"), exist_ok=True)
 os.makedirs(os.path.join(PROJECT_ROOT, "structured_content"), exist_ok=True)
+# Create directory for local Qdrant database
+os.makedirs(os.path.join(PROJECT_ROOT, "qdrant_data"), exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,9 +32,6 @@ logger = logging.getLogger("indexer")
 # Initialize Hugging Face Tokenizer and Model for embeddings
 tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-
-# Initialize Qdrant client
-qdrant_client = QdrantClient(host="localhost", port=6333) # Connect to local Qdrant instance
 
 def encode(texts):
     """Generates embeddings for a list of texts using Hugging Face Transformers."""
@@ -85,14 +86,15 @@ def chunk_documents(documents):
 
 def create_and_store_embeddings(chunks_with_metadata, collection_name="gitlab_handbook"):
     """Ingest files into the vector database"""
+    client = get_qdrant_client()
     try:
-        qdrant_client.delete_collection(collection_name=collection_name)
+        client.delete_collection(collection_name=collection_name)
         logger.info(f"Deleted existing collection: {collection_name}")
     except Exception as e:
         logger.info(f"No existing collection to delete or error deleting: {collection_name}. Error: {e}")
     
     # Create collection with specified vector parameters
-    qdrant_client.recreate_collection(
+    client.recreate_collection(
         collection_name=collection_name,
         vectors_config=models.VectorParams(size=model.config.hidden_size, distance=models.Distance.COSINE),
     )
@@ -117,7 +119,7 @@ def create_and_store_embeddings(chunks_with_metadata, collection_name="gitlab_ha
         ]
         
         # Upsert documents into Qdrant
-        operation_info = qdrant_client.upsert(
+        operation_info = client.upsert(
             collection_name=collection_name,
             wait=True,
             points=points
@@ -132,8 +134,9 @@ def create_and_store_embeddings(chunks_with_metadata, collection_name="gitlab_ha
 def list_and_describe_collections():
     """Lists all collections and provides a basic description."""
     print("\n--- Listing Qdrant Collections ---")
+    client = get_qdrant_client()
     try:
-        response = qdrant_client.get_collections()
+        response = client.get_collections()
         collections = response.collections
     except Exception as e:
         print(f"Error fetching collections: {e}")
@@ -150,7 +153,7 @@ def list_and_describe_collections():
             print(f"  - Collection Name: {collection_name}")
 
             # Fetch detailed collection info
-            collection_details = qdrant_client.get_collection(collection_name)
+            collection_details = client.get_collection(collection_name)
             points_count = collection_details.points_count
             status = collection_details.status
 
