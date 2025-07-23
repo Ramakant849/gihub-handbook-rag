@@ -906,7 +906,7 @@ def list_and_describe_collections():
 
 def main():
     # list_and_describe_collections()
-    load_docs_and_push_to_db()
+    # load_docs_and_push_to_db()
 
     # Load configuration
     host = os.getenv("HOST", "0.0.0.0")

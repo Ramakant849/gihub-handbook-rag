@@ -5,7 +5,7 @@ __pycache__/
 *$py.class
 
 # Vector database (local mode)
-qdrant_data/
+# qdrant_data/
 
 # Environment variables
 .env
