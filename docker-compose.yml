@@ -9,15 +9,10 @@ services:
     ports:
       - "8491:8491"
     environment:
-      - HOST=0.0.0.0
-      - PORT=8491
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
       - BASE_URL=${BASE_URL:-https://handbook.gitlab.com/}
-      - LARK_APP_ID=${LARK_APP_ID:-}
-      - LARK_APP_SECRET=${LARK_APP_SECRET:-}
-      - LARK_VERIFICATION_TOKEN=${LARK_VERIFICATION_TOKEN:-}
-      - LARK_ENCRYPT_KEY=${LARK_ENCRYPT_KEY:-}
-      - LARK_HOST=${LARK_HOST:-https://open.feishu.cn}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8491}
     volumes:
       # Mount logs directory to persist logs
       - ./logs:/app/logs

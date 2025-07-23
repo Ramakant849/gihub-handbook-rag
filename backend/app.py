@@ -3,6 +3,7 @@ import sys # Import sys
 import json
 import logging
 import time
+import uuid
 import torch
 from tiktoken import encoding_for_model
 from dotenv import load_dotenv
@@ -10,13 +11,11 @@ from flask import Flask, request, jsonify
 from qdrant_client import QdrantClient, models
 from transformers import AutoModel, AutoTokenizer
 from qdrant_client_shared import get_qdrant_client
-# Import Lark handler
 # Adjust project root for sys.path to resolve relative import issues when running directly
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-from lark_handler import init_lark_bot # Changed to relative import for Docker
 # Import model configuration
 from model_config import generate_completion, start_request_flow, end_request_flow, suppress_duplicate_logs # Changed to relative import for Docker
 from vector_database_handler import load_docs_and_push_to_db
@@ -117,7 +116,7 @@ def parse_json_array_safely(response_text):
     # If all else fails, try to extract file paths using regex
     file_paths = []
     # Look for quoted strings that might be file paths
-    path_matches = re.findall(r'"([^"]+\.[^"]+)', response_text)
+    path_matches = re.findall(r'"([^"]+\.[^"]+)"', response_text)
     if path_matches:
         for match in path_matches:
             if '/' in match and '.' in match:  # Basic check if it looks like a file path
@@ -691,20 +690,7 @@ def chat_endpoint():
         query = data['query']
         
         # Get session ID for conversation tracking (defaults to a new random ID if not provided)
-        # For Lark bot messages, create a consistent session ID based on the user ID
-        if data.get('source') == 'lark_bot':
-            lark_user_id = data.get('lark_user_id', 'unknown_lark_user')
-            # Create a stable ID for each Lark user rather than basing it on message content
-            session_id = f"lark_user_{lark_user_id}"
-            logger.info(f"Using Lark-specific user session ID: {session_id}")
-        else:
-            # For other clients, use the provided session ID or generate a stable one
-            session_id = data.get('session_id')
-            if not session_id:
-                # Generate a session ID based on client IP for stability
-                client_ip = request.remote_addr
-                session_id = f"session_{hash(client_ip)}"
-                logger.info(f"Generated session ID based on client IP: {session_id}")
+        session_id = data.get('session_id', str(uuid.uuid4()))
         
         logger.info(f"Received query in session {session_id}: {query}")
         
@@ -928,9 +914,6 @@ def main():
     
     # Enable duplicate log suppression
     suppress_duplicate_logs()
-    
-    # Initialize Lark bot handler
-    init_lark_bot(app)
     
     # Start the Flask app
     logger.info(f"Starting server on {host}:{port}")

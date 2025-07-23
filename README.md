@@ -225,14 +225,9 @@ This will launch the chatbot interface in your web browser, typically at `http:/
 ```
 assignment/
 ├── backend/
-│   ├── app.py                      # Main Flask application
-│   ├── vector_database_handler.py  # Qdrant local mode setup
-│   ├── model_config.py             # Gemini API configuration
-│   ├── lark_handler.py             # Lark bot integration
-│   ├── requirements.txt            # Python dependencies
-│   ├── Dockerfile                  # Container deployment (optional)
-│   ├── sample_data/                # Sample documents for indexing
-│   └── logs/                       # Application logs
+│   ├── vector_database_handler.py  # Vector database operations
+│   ├── app.py                      # Main Flask application  
+│   └── requirements.txt            # Python dependencies
 ├── frontend/
 │   ├── app.py                      # Streamlit chat interface
 │   └── requirements.txt            # Frontend dependencies

@@ -17,9 +17,8 @@ qdrant-client>=1.14.3
 # Text Processing and Document Handling
 langchain>=0.1.0
 
-# HTTP Client and Security
+# HTTP Client
 Requests==2.32.3
-pycryptodome==3.19.0
 
 # Note: For local Qdrant mode, no external server dependencies are required
 # The qdrant-client package includes all necessary components for local operation
